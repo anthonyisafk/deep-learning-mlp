@@ -10,9 +10,8 @@ class Neuron:
         self.type = type
         self.f = f
         self.beta = beta
+        self.theta = theta
         self.n_in = nw - 1 if nw > 0 else 0
-        self.x = np.ndarray(dtype=np.float16, shape=(nw))
-        self.x[0] = theta
 
 
     def __str__(self):
@@ -20,19 +19,20 @@ class Neuron:
         return txt.format(self.lid, self.id, self.type, self.w)
 
 
-    def get_y(self):
-        self.u = np.dot(self.x, self.w)
+    def get_y(self, x):
+        x = np.concatenate(([self.theta], x), axis=None)
+        self.u = np.dot(x, self.w)
         self.y = self.f(self.u)
 
 
-    y:np.float32    # output
-    f:callable      # activation function
-    beta:np.float32 # learning rate
-    x:np.ndarray    # input
-    w:np.ndarray    # weights
-    u:np.ndarray    # f(x)
-    d:float         # targets
-    type:str        # [input, output, or hidden]
-    n_in:int        # len(x)
-    id:int          # id in the layer
-    lid:int         # id of the layer
+    y:np.float32     # output
+    f:callable       # activation function
+    theta:np.float32 # bias
+    beta:np.float32  # learning rate
+    w:np.ndarray     # weights
+    u:np.ndarray     # f(x)
+    d:float          # targets
+    type:str         # [input, output, or hidden]
+    n_in:int         # len(x)
+    id:int           # id in the layer
+    lid:int          # id of the layer
