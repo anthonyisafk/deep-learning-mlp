@@ -33,12 +33,12 @@ class Network:
         if i == 0: # input layer only `sees` one entry of the input.
             for j in range(n_i):
                 node_i = self.layers[i].nodes[j]
-                node_i.get_y(x[j])
+                node_i.set_y(x[j])
                 y[j] = node_i.y
         else:
             for j in range(n_i): # rest of the layers are fully connected.
                 node_i = self.layers[i].nodes[j]
-                node_i.get_y(x)
+                node_i.set_y(x)
                 y[j] = node_i.y
         return y
 
