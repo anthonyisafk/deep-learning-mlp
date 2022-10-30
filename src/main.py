@@ -1,5 +1,5 @@
 """
-Neural Networks - Deep Learning
+Neural Networks & Deep Learning
 Aristotle University Thessaloniki - School of Informatics.
 ******************************
 @brief: An *attempt* at making an ANN from scratch. Trained on the MNIST dataset.
@@ -14,7 +14,4 @@ def f(u):
     return 1 if u > 0 else -1
 
 if __name__ == "__main__":
-    print("Hello world?")
-
-    n = Neuron(2, 0, [0, 0.2, -0.3], 'in', 2, 3, f)
-    print(n)
+    dnn = Network(4, np.array([3, 4, 4, 3]), 0.05, 0.1, 10, 20, f)
