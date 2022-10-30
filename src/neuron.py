@@ -19,7 +19,7 @@ class Neuron:
         return txt.format(self.lid, self.id, self.type, self.w)
 
 
-    def get_y(self, x):
+    def set_y(self, x):
         x = np.concatenate(([self.theta], x), axis=None)
         self.u = np.dot(x, self.w)
         self.y = self.f(self.u)
