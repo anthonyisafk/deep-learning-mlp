@@ -1,12 +1,12 @@
 from neuron import *
 from layer import *
+from activation import *
 
 
 class Network:
-    def __init__(self, nlayers, nodes, eta, theta, epochs, minj, f, df):
+    def __init__(self, nlayers, nodes, eta, theta, epochs, minj, f:activation):
         self.nlayers = nlayers
-        self.f = f
-        self.df = df
+        self.f, self.df = get_activation_function(f)
         self.nodes_per_layer = nodes
         self.eta = eta
         self.theta = theta
@@ -16,7 +16,7 @@ class Network:
         t = 'i'
         for i in range(nlayers):
             n_prev = nodes[i - 1] if i > 0 else 1
-            self.layers[i] = Layer(i, nodes[i], n_prev, t, eta, theta, f, df)
+            self.layers[i] = Layer(i, nodes[i], n_prev, t, eta, theta, self.f, self.df)
             t = 'h' if i < nlayers - 2 else 'o'
 
 
