@@ -20,8 +20,10 @@ class Neuron:
 
 
     def set_y(self, x):
-        x = np.concatenate(([self.theta], x), axis=None)
-        self.u = np.dot(x, self.w)
+        self.u = np.dot(
+            np.concatenate(([self.theta], x), axis=None),
+            self.w
+        )
         self.y = self.f(self.u)
 
 
