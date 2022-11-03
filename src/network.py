@@ -3,20 +3,21 @@ from layer import *
 
 
 class Network:
-    def __init__(self, nlayers, nodes, eta, theta, epochs, minj, f):
+    def __init__(self, nlayers, nodes, eta, theta, epochs, minj, f, df):
         self.nlayers = nlayers
         self.f = f
+        self.df = df
         self.nodes_per_layer = nodes
         self.eta = eta
         self.theta = theta
         self.epochs = epochs
         self.minj = minj
         self.layers = np.ndarray(dtype=Layer, shape=(nlayers))
-        type = 'i'
+        t = 'i'
         for i in range(nlayers):
             n_prev = nodes[i - 1] if i > 0 else 1
-            self.layers[i] = Layer(i, nodes[i], n_prev, type, eta, theta, f)
-            type = 'h' if i < nlayers - 2 else 'o'
+            self.layers[i] = Layer(i, nodes[i], n_prev, t, eta, theta, f, df)
+            t = 'h' if i < nlayers - 2 else 'o'
 
 
     def predict(self, x):
@@ -33,13 +34,15 @@ class Network:
         if i == 0: # input layer only `sees` one entry of the input.
             for j in range(n_i):
                 node_i = self.layers[i].nodes[j]
-                node_i.set_y(x[j])
-                y[j] = node_i.y
+                node_i.u = node_i.get_u(x[i])
+                y[j] = node_i.get_y()
+                node_i.y = y[j]
         else:
             for j in range(n_i): # rest of the layers are fully connected.
                 node_i = self.layers[i].nodes[j]
-                node_i.set_y(x)
-                y[j] = node_i.y
+                node_i.u = node_i.get_u(x)
+                y[j] = node_i.get_y()
+                node_i.y = y[j]
         return y
 
 
@@ -47,6 +50,7 @@ class Network:
     layers:np.ndarray          # list of layers
     nodes_per_layer:np.ndarray # neurons per layer
     f:callable                 # activation function
+    df:callable                # activation function derivative
     eta:np.float32             # learning rate
     theta:np.float32           # bias
     epochs:int                 # number of epochs per training
