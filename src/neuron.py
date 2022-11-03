@@ -2,14 +2,14 @@ import numpy as np
 
 
 class Neuron:
-    def __init__(self, id, lid, w, type, beta, theta, f):
+    def __init__(self, id, lid, w, type, eta, theta, f):
         nw = len(w)
         self.id = id
         self.lid = lid
         self.w = w
         self.type = type
         self.f = f
-        self.beta = beta
+        self.eta = eta
         self.theta = theta
         self.n_in = nw - 1 if nw > 0 else 0
 
@@ -28,10 +28,10 @@ class Neuron:
     y:np.float32     # output
     f:callable       # activation function
     theta:np.float32 # bias
-    beta:np.float32  # learning rate
+    eta:np.float32   # learning rate
     w:np.ndarray     # weights
     u:np.ndarray     # f(x)
-    d:float          # targets
+    d:np.float32     # target
     type:str         # [input, output, or hidden]
     n_in:int         # len(x)
     id:int           # id in the layer

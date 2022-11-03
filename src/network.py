@@ -3,11 +3,11 @@ from layer import *
 
 
 class Network:
-    def __init__(self, nlayers, nodes, beta, theta, epochs, minj, f):
+    def __init__(self, nlayers, nodes, eta, theta, epochs, minj, f):
         self.nlayers = nlayers
         self.f = f
         self.nodes_per_layer = nodes
-        self.beta = beta
+        self.eta = eta
         self.theta = theta
         self.epochs = epochs
         self.minj = minj
@@ -15,7 +15,7 @@ class Network:
         type = 'i'
         for i in range(nlayers):
             n_prev = nodes[i - 1] if i > 0 else 1
-            self.layers[i] = Layer(i, nodes[i], n_prev, type, beta, theta, f)
+            self.layers[i] = Layer(i, nodes[i], n_prev, type, eta, theta, f)
             type = 'h' if i < nlayers - 2 else 'o'
 
 
@@ -47,7 +47,7 @@ class Network:
     layers:np.ndarray          # list of layers
     nodes_per_layer:np.ndarray # neurons per layer
     f:callable                 # activation function
-    beta:np.float32            # learning rate
+    eta:np.float32             # learning rate
     theta:np.float32           # bias
     epochs:int                 # number of epochs per training
     e:np.float32               # total error
