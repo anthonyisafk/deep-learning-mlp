@@ -4,14 +4,12 @@ from activation import *
 
 
 class Network:
-    def __init__(self, nlayers, nodes, eta, theta, epochs, minj, f:activation):
+    def __init__(self, nlayers, nodes, eta, theta, f:activation):
         self.nlayers = nlayers
         self.f, self.df = get_activation_function(f)
         self.nodes_per_layer = nodes
         self.eta = eta
         self.theta = theta
-        self.epochs = epochs
-        self.minj = minj
         self.layers = np.ndarray(dtype=Layer, shape=(nlayers))
         t = 'i'
         for i in range(nlayers):
@@ -46,6 +44,9 @@ class Network:
         return y
 
 
+    # def train(self, batch_size, epochs):
+
+
     nlayers:int                # number of layers
     layers:np.ndarray          # list of layers
     nodes_per_layer:np.ndarray # neurons per layer
@@ -53,7 +54,5 @@ class Network:
     df:callable                # activation function derivative
     eta:np.float32             # learning rate
     theta:np.float32           # bias
-    epochs:int                 # number of epochs per training
     e:np.float32               # total error
     acc:np.float32             # accuracy percentage
-    minj:np.float32            # threshold by which training is considered done
