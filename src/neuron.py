@@ -28,6 +28,10 @@ class Neuron:
         return self.f(self.u)
 
 
+    def get_error(self):
+        return self.d - self.y;
+
+
     y:np.float32     # output
     f:callable       # activation function
     df:callable      # activation function derivative
