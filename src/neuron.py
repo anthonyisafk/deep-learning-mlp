@@ -2,6 +2,21 @@ import numpy as np
 
 
 class Neuron:
+    y:np.float32     # output
+    f:callable       # activation function
+    df:callable      # activation function derivative
+    theta:np.float32 # bias
+    eta:np.float32   # learning rate
+    w:np.ndarray     # weights
+    u:np.ndarray     # f(x)
+    d:np.float32     # target
+    t:str            # [input, output, or hidden]
+    n_in:int         # len(x)
+    id:int           # id in the layer
+    lid:int          # id of the layer
+    e:np.float32     # error signal
+
+
     def __init__(self, id, lid, w, t, eta, theta, f, df):
         nw = len(w)
         self.id = id
@@ -30,18 +45,3 @@ class Neuron:
 
     def get_error(self):
         return self.d - self.y;
-
-
-    y:np.float32     # output
-    f:callable       # activation function
-    df:callable      # activation function derivative
-    theta:np.float32 # bias
-    eta:np.float32   # learning rate
-    w:np.ndarray     # weights
-    u:np.ndarray     # f(x)
-    d:np.float32     # target
-    t:str            # [input, output, or hidden]
-    n_in:int         # len(x)
-    id:int           # id in the layer
-    lid:int          # id of the layer
-    e:np.float32     # error signal
