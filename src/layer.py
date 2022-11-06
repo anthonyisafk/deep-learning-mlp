@@ -8,7 +8,7 @@ class Layer:
     n:int            # number of neurons
     t:str            # [input, output, or hidden]
     nodes:np.ndarray # list of neurons in layer
-    e:np.float32     # sum of errors
+    n_prev:int       # nodes in previous layer
 
 
     def __init__(self, lid, n, n_prev, t, eta, theta, f, df):
@@ -18,6 +18,7 @@ class Layer:
         self.lid = lid
         self.t = t
         self.eta = eta
+        self.n_prev = n_prev
         self.nodes = np.ndarray(dtype=Neuron, shape=(n))
         for i in range(n):
             self.nodes[i] = initialize_node(i, lid, t, eta, theta, n_prev, scal, f, df)
