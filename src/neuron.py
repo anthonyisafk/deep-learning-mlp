@@ -5,7 +5,6 @@ class Neuron:
     y:np.float32     # output
     f:callable       # activation function
     df:callable      # activation function derivative
-    theta:np.float32 # bias
     eta:np.float32   # learning rate
     w:np.ndarray     # weights
     u:np.ndarray     # f(x)
@@ -17,8 +16,10 @@ class Neuron:
     e:np.float32     # error signal
 
 
-    def __init__(self, id, lid, w, t, eta, theta, f, df):
+    def __init__(self, id, lid, w, t, eta, f, df):
         nw = len(w)
+        self.u = 0
+        self.y = 0
         self.id = id
         self.lid = lid
         self.w = w
@@ -26,7 +27,6 @@ class Neuron:
         self.f = f
         self.df = df
         self.eta = eta
-        self.theta = theta
         self.n_in = nw - 1 if nw > 0 else 0
 
 
@@ -36,7 +36,7 @@ class Neuron:
 
 
     def get_u(self, x:np.ndarray):
-        return np.dot(np.concatenate(([self.theta], x), axis=None), self.w)
+        return np.dot(np.concatenate(([-1], x), axis=None), self.w)
 
 
     def get_y(self):
