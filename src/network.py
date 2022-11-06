@@ -42,33 +42,11 @@ class Network:
                     set_targets(out_layer, nout, curr_d)
                     y = self.training_predict(curr_x)
                     self.get_output_errors(nout, out_layer)
-                    last_hidden = self.layers[last_idx - 1]
-                    update_output_weights(last_hidden, out_layer, nout, self.eta)
-
-                    curr_layer = last_hidden
-                    next_layer = out_layer
-                    for l in range(last_idx - 1, 1, -1):
-                        lsize = curr_layer.n
-                        previous_layer = self.layers[l - 1]
-                        prev_lsize = previous_layer.n
-                        for i in range(lsize):
-                            node_i = curr_layer.nodes[i]
-                            # print(f" before : {node_i}")
-                            node_i.delta = calculate_delta(self.df(node_i.u), next_layer, i)
-                            for j in range(prev_lsize):
-                                node_i.w[j] += self.eta * node_i.delta * previous_layer.nodes[j].y
-                            # print(f" after : {node_i}")
-                        next_layer = curr_layer
-                        curr_layer = previous_layer
-
-
-
-
-
-
-
-                    curr_idx += 1
-
+                last_hidden = self.layers[last_idx - 1]
+                update_output_weights(last_hidden, out_layer, nout, self.eta)
+                self.update_hidden_weights(last_hidden, out_layer, last_idx)
+                curr_idx += 1
+            self.e /= size
 
             print(f"  ** iter {iter} : e = {self.e}")
             # if self.e <= minJ:
@@ -115,3 +93,21 @@ class Network:
             node.e = node.get_error()
             node.delta = node.e * self.df(node.u)
             self.e += node.e ** 2
+
+
+    def update_hidden_weights(self, last_hidden, out_layer, last_idx):
+        curr_layer = last_hidden
+        next_layer = out_layer
+        for l in range(last_idx - 1, -1, -1):
+            lsize = curr_layer.n
+            previous_layer = self.layers[l - 1]
+            for i in range(lsize):
+                node_i = curr_layer.nodes[i]
+                node_i.delta = calculate_delta(self.df(node_i.u), next_layer, i)
+                node_i.w[0] -= self.eta * node_i.delta
+                for j in range(curr_layer.n_prev):
+                    node_i.w[j + 1] += self.eta * node_i.delta * previous_layer.nodes[j].y
+            if l != 0:
+                next_layer = curr_layer
+                curr_layer = previous_layer
+
