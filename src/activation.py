@@ -11,12 +11,12 @@ class activation(Enum):
 
 
 def nn_step(x):
-    return -1 if x <= 0 else 1
+    return 0 if x <= 0 else 1
 def dnn_step(x):
     return 0
 
 def n_step(x):
-    return 0 if x <= 0 else 1
+    return -1 if x <= 0 else 1
 def dn_step(x):
     return 0
 
