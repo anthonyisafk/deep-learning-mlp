@@ -1,4 +1,5 @@
 from neuron import *
+from utils import check_for_type, initialize_node
 
 
 class Layer:
@@ -20,18 +21,4 @@ class Layer:
         self.nodes = np.ndarray(dtype=Neuron, shape=(n))
         for i in range(n):
             self.nodes[i] = initialize_node(i, lid, t, eta, theta, n_prev, scal, f, df)
-
-
-"""
-Initialize a neuron using He random weight assignment.
-"""
-def initialize_node(i, lid, t, eta, theta, n_prev, scal, f, df):
-    w = np.random.rand(n_prev + 1) * scal
-    w[0] = -1
-    return Neuron(i, lid, w, t, eta, theta, f, df)
-
-
-def check_for_type(t):
-    if t != 'i' and t != 'o' and t != 'h':
-        error = f"No type '{t}' allowed. : {'i', 'o', 'h'}"
-        raise Exception(error)
+            print(self.nodes[i])
