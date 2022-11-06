@@ -13,7 +13,7 @@ class Layer:
 
     def __init__(self, lid, n, n_prev, t, eta, theta, f, df):
         check_for_type(t)
-        scal = np.sqrt(2 / n_prev) # factor by which the random weights will be multiplied.
+        scal = np.sqrt(2 / n_prev) if lid != 0 else 1
         self.n = n
         self.lid = lid
         self.t = t
@@ -21,4 +21,4 @@ class Layer:
         self.nodes = np.ndarray(dtype=Neuron, shape=(n))
         for i in range(n):
             self.nodes[i] = initialize_node(i, lid, t, eta, theta, n_prev, scal, f, df)
-            print(self.nodes[i])
+            # print(self.nodes[i])
