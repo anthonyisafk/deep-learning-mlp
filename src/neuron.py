@@ -2,12 +2,12 @@ import numpy as np
 
 
 class Neuron:
-    y:np.float32      # output
+    _y:np.float32     # output
     f:callable        # activation function
     df:callable       # activation function derivative
     eta:np.float32    # learning rate
     _w:np.ndarray     # weights
-    u:np.ndarray      # f(x)
+    _u:np.float32     # f(x)
     _d:np.float32     # target
     t:str             # [input, output, or hidden]
     n_in:int          # len(x)
@@ -15,16 +15,17 @@ class Neuron:
     lid:int           # id of the layer
     _e:np.float32     # error value
     _delta:np.float32 # back propagation error signal
-
+    _wprev:np.float32 # previous weights
 
     def __init__(self, id, lid, w, t, eta, f, df):
         nw = len(w)
-        self.u = 0
-        self.y = 0
+        self._u = 0
+        self._y = 0
         self._delta = 0
         self.id = id
         self.lid = lid
         self._w = w
+        self._wprev = np.zeros_like(w)
         self.t = t
         self.f = f
         self.df = df
@@ -34,19 +35,19 @@ class Neuron:
 
     def __str__(self):
         fmt = "node[L{},{},'{}'] : {}"
-        return fmt.format(self.lid, self.id, self.t, self.w)
+        return fmt.format(self.lid, self.id, self.t, self._w)
 
 
     def get_u(self, x:np.ndarray):
-        return np.dot(x, self.w)
+        return np.dot(x, self._w)
 
 
     def get_y(self):
-        return self.f(self.u)
+        return self.f(self._u)
 
 
     def get_error(self):
-        return self.d - self.y;
+        return self._d - self._y;
 
     # Properties that need to be turned `private`, to create setters. #
 
@@ -80,3 +81,27 @@ class Neuron:
     @delta.setter
     def delta(self, delta):
         self._delta = delta
+
+
+    @property
+    def wprev(self):
+        return self._wprev
+    @wprev.setter
+    def wprev(self, wprev):
+        self._wprev = wprev
+
+
+    @property
+    def u(self):
+        return self._u
+    @u.setter
+    def u(self, u):
+        self._u = u
+
+
+    @property
+    def y(self):
+        return self._y
+    @y.setter
+    def y(self, y):
+        self._y = y
