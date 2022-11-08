@@ -11,6 +11,7 @@ class Network:
     f:callable                 # activation function
     df:callable                # activation function derivative
     eta:np.float32             # learning rate
+    alpha:np.float32           # momentum constant
     e:np.float32               # total error
     acc:np.float32             # accuracy percentage
 
@@ -20,6 +21,7 @@ class Network:
         self.f, self.df = get_activation_function(f)
         self.nodes_per_layer = nodes
         self.eta = eta
+        self.alpha = 0.00
         self.e = 0
         self.layers = np.ndarray(dtype=Layer, shape=(nlayers))
         t = 'i'
@@ -32,23 +34,26 @@ class Network:
     def train(self, x, d, batch_size, epochs, minJ):
         size, last_idx, out_layer, nout = self.get_input_output_info(x)
         for iter in range(epochs):
+            perm = np.random.permutation(size)
+            # print(perm)
+            x, d = x[perm], d[perm]
             curr_idx = 0
             self.e = 0
             for b in range(0, size, batch_size):
-                b_size = min(batch_size, size - b * batch_size)
+                b_size = min(batch_size, size - b)
                 for p in range(b_size):
                     curr_x = x[curr_idx]
                     curr_d = d[curr_idx]
                     set_targets(out_layer, nout, curr_d)
                     y = self.training_predict(curr_x)
                     self.get_output_errors(nout, out_layer)
-                last_hidden = self.layers[last_idx - 1]
-                update_output_weights(last_hidden, out_layer, nout, self.eta)
-                self.update_hidden_weights(last_hidden, out_layer, last_idx)
-                curr_idx += 1
+                    curr_idx += 1
+                    last_hidden = self.layers[last_idx - 1]
+                    update_output_weights(last_hidden, out_layer, nout, self.eta, self.alpha)
+                    self.update_hidden_weights(last_hidden, out_layer, last_idx)
             self.e /= size
 
-            print(f"  ** iter {iter} : e = {self.e}")
+            print(f"  ** epoch {iter} : e = {self.e}")
             # if self.e <= minJ:
             #     print(f"  >> Stopping training in step {iter}. MSE reached minJ = {minJ}, or lower.\n")
             #     break
@@ -104,10 +109,14 @@ class Network:
             for i in range(lsize):
                 node_i = curr_layer.nodes[i]
                 node_i.delta = calculate_delta(self.df(node_i.u), next_layer, i)
-                node_i.w[0] -= self.eta * node_i.delta
+                wprev = node_i.wprev[0]
+                node_i.wprev[0] = node_i.w[0]
+                node_i.w[0] -= self.eta * node_i.delta + self.alpha * wprev
                 for j in range(curr_layer.n_prev):
-                    node_i.w[j + 1] += self.eta * node_i.delta * previous_layer.nodes[j].y
-            if l != 0:
-                next_layer = curr_layer
-                curr_layer = previous_layer
+                    wprev = node_i.wprev[j + 1]
+                    node_i.wprev[j + 1] = node_i.w[j + 1]
+                    node_i.w[j + 1] += self.eta * node_i.delta * previous_layer.nodes[j].y + self.alpha * wprev
+            # if l != 0:
+            next_layer = curr_layer
+            curr_layer = previous_layer
 
