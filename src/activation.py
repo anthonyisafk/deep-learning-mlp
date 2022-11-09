@@ -1,43 +1,44 @@
 from enum import Enum
 import numpy as np
+from mpmath import sech
 
+
+alpha = 1.7159
+beta = 2 / 3
 
 class activation(Enum):
-    step_non_neg = 0
-    step_neg = 1
-    relu = 2
-    tanh = 3
-    logistic = 4
+    identity = 0
+    relu = 1
+    tanh = 2
+    logistic = 3
 
 
-def nn_step(x):
-    return 0 if x <= 0 else 1
-def dnn_step(x):
+def identity(x):
+    return x
+def didentity(x):
     return 0
 
-def n_step(x):
-    return -1 if x <= 0 else 1
-def dn_step(x):
-    return 0
 
 def relu(x):
     return 0 if x < 0 else x
 def drelu(x):
     return 0 if x < 0 else 1
 
+
 def tanh(x):
-    return 1.5 * np.tanh(x)
-def dtanh(x): # dtanh(x)/dx = (sech(x))^2
-    return (0.67 / np.cosh(x)) ** 2
+    return alpha * np.tanh(beta * x)
+def dtanh(x): # d(atanh(bx))/dx = ab(sech(bx))^2
+    return alpha * beta * sech(beta * x) ** 2
+
 
 def logistic(x):
-    return 1.5 / (1 + np.exp(-1 * x))
+    return 1.0 / (1 + np.exp(-1 * x))
 def dlogistic(x):
-    return (1.5 * np.exp(-1 * x)) / ((1 + np.exp(-1 * x)) ** 2)
+    return (np.exp(-1 * x)) / ((1 + np.exp(-1 * x)) ** 2)
 
 
-fs = [nn_step, n_step, relu, tanh, logistic]
-dfs = [dnn_step, dn_step, drelu, dtanh, dlogistic]
+fs = [identity, relu, tanh, logistic]
+dfs = [didentity, drelu, dtanh, dlogistic]
 def get_activation_function(strf:activation):
     return fs[strf.value], dfs[strf.value]
 
