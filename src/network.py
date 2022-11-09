@@ -16,19 +16,22 @@ class Network:
     acc:np.float32             # accuracy percentage
 
 
-    def __init__(self, nlayers, nodes, eta, theta, f:activation):
+    def __init__(self, nlayers, nodes, eta, theta, alpha, f:activation):
+        check_for_layers(nlayers)
         self.nlayers = nlayers
         self.f, self.df = get_activation_function(f)
         self.nodes_per_layer = nodes
         self.eta = eta
-        self.alpha = 0.00
+        self.alpha = alpha
         self.e = 0
         self.layers = np.ndarray(dtype=Layer, shape=(nlayers))
         t = 'i'
-        for i in range(nlayers):
-            n_prev = nodes[i - 1] if i > 0 else 1
+        ident, dident = get_activation_function(activation.identity)
+        self.layers[0] = Layer(0, nodes[0], 1, t, eta, theta, ident, dident)
+        for i in range(1, nlayers):
+            t = 'h' if i < nlayers - 1 else 'o'
+            n_prev = nodes[i - 1]
             self.layers[i] = Layer(i, nodes[i], n_prev, t, eta, theta, self.f, self.df)
-            t = 'h' if i < nlayers - 2 else 'o'
 
 
     def train(self, x, d, batch_size, epochs, minJ):
@@ -51,7 +54,7 @@ class Network:
                     last_hidden = self.layers[last_idx - 1]
                     update_output_weights(last_hidden, out_layer, nout, self.eta, self.alpha)
                     self.update_hidden_weights(last_hidden, out_layer, last_idx)
-            self.e /= size
+            self.e /= (size * nout)
 
             print(f"  ** epoch {iter} : e = {self.e}")
             # if self.e <= minJ:
@@ -60,7 +63,9 @@ class Network:
 
     def training_predict(self, x):
         y = x
-        for i in range(self.nlayers):
+        for i in range(len(x)):
+            self.layers[0].nodes[i].y = x[i]
+        for i in range(1, self.nlayers):
             # print(y)
             y = self.training_predict_layer(y, i)
         return y
@@ -70,17 +75,11 @@ class Network:
         n_i = self.nodes_per_layer[i]
         layer_i = self.layers[i]
         y = np.ndarray(shape=(n_i))
-        if i == 0: # input layer only `sees` one entry of the input.
-            for j in range(n_i):
-                node_j = layer_i.nodes[j]
-                node_j.u, node_j.y = training_predict_node(node_j, [-1, x[j]])
-                y[j] = node_j.y
-        else:
-            x = np.concatenate(([-1], x), axis=None)
-            for j in range(n_i): # rest of the layers are fully connected.
-                node_j = layer_i.nodes[j]
-                node_j.u, node_j.y = training_predict_node(node_j, x)
-                y[j] = node_j.y
+        x = np.concatenate(([-1], x), axis=None)
+        for j in range(n_i): # rest of the layers are fully connected.
+            node_j = layer_i.nodes[j]
+            node_j.u, node_j.y = training_predict_node(node_j, x)
+            y[j] = node_j.y
         return y
 
 
@@ -103,7 +102,7 @@ class Network:
     def update_hidden_weights(self, last_hidden, out_layer, last_idx):
         curr_layer = last_hidden
         next_layer = out_layer
-        for l in range(last_idx - 1, -1, -1):
+        for l in range(last_idx - 1, 0, -1):
             lsize = curr_layer.n
             previous_layer = self.layers[l - 1]
             for i in range(lsize):
