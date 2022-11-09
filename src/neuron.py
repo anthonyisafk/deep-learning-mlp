@@ -21,6 +21,7 @@ class Neuron:
         nw = len(w)
         self._u = 0
         self._y = 0
+        self._e = 0
         self._delta = 0
         self.id = id
         self.lid = lid
