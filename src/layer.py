@@ -9,6 +9,8 @@ class Layer:
     t:str            # [input, output, or hidden]
     nodes:np.ndarray # list of neurons in layer
     n_prev:int       # nodes in previous layer
+    f:callable       # activation function of layer nodes
+    df:callable      # df(x)/dx
 
 
     def __init__(self, lid, n, n_prev, t, eta, theta, f, df):
@@ -19,6 +21,8 @@ class Layer:
         self.t = t
         self.eta = eta
         self.n_prev = n_prev
+        self.f = f
+        self.df = df
         self.nodes = np.ndarray(dtype=Neuron, shape=(n))
         for i in range(n):
             self.nodes[i] = initialize_node(i, lid, t, eta, theta, n_prev, scal, f, df)
