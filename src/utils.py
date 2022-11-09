@@ -7,9 +7,10 @@ from neuron import *
 """
 Initialize a neuron using He random weight assignment.
 """
-def initialize_node(i, lid, t, eta, theta, n_prev, scal, f, df):
+def initialize_node(i, lid, t, eta, theta, n_prev, f, df):
     if t != 'i':
-        w = np.random.rand(n_prev + 1) * scal
+        np.random.seed(i * lid)
+        w = np.random.uniform(size=(n_prev + 1))
         w[0] = theta
         return Neuron(i, lid, w, t, eta, f, df)
     else:
@@ -55,8 +56,8 @@ def update_output_weights(last_hidden, out_layer, nout, eta, alpha):
             node_i.w[j + 1] += eta * node_i.delta * last_hidden.nodes[j].y + alpha * wprev
 
 
-def calculate_delta(dfu, next_layer, i):
+def calculate_delta(dfu, next_layer, next_layer_deltas, i):
     delta = 0.0
     for j in range(next_layer.n):
-        delta += next_layer.nodes[j].delta * next_layer.nodes[j].w[i + 1]
+        delta += next_layer_deltas[j] * next_layer.nodes[j].w[i + 1]
     return dfu * delta

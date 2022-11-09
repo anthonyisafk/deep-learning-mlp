@@ -14,24 +14,28 @@ class Network:
     alpha:np.float32           # momentum constant
     e:np.float32               # total error
     acc:np.float32             # accuracy percentage
+    sdeltas:np.ndarray        # table of deltas for a single sample.
 
 
-    def __init__(self, nlayers, nodes, eta, theta, alpha, f:activation):
-        check_for_layers(nlayers)
-        self.nlayers = nlayers
+    def __init__(self, nodes, eta, theta, alpha, f:activation):
+        self.nlayers = len(nodes)
+        check_for_layers(self.nlayers)
         self.f, self.df = get_activation_function(f)
         self.nodes_per_layer = nodes
         self.eta = eta
         self.alpha = alpha
         self.e = 0
-        self.layers = np.ndarray(dtype=Layer, shape=(nlayers))
+        self.layers = np.ndarray(dtype=Layer, shape=(self.nlayers))
         t = 'i'
         ident, dident = get_activation_function(activation.identity)
         self.layers[0] = Layer(0, nodes[0], 1, t, eta, theta, ident, dident)
-        for i in range(1, nlayers):
-            t = 'h' if i < nlayers - 1 else 'o'
+        for i in range(1, self.nlayers):
+            t = 'h' if i < self.nlayers - 1 else 'o'
             n_prev = nodes[i - 1]
             self.layers[i] = Layer(i, nodes[i], n_prev, t, eta, theta, self.f, self.df)
+        self.sdeltas = np.ndarray(dtype=np.ndarray, shape=(self.nlayers - 1))
+        for i in range(self.nlayers - 1):
+            self.sdeltas[i] = np.zeros(dtype=np.float32, shape=(nodes[i + 1]))
 
 
     def train(self, x, d, batch_size, epochs, minJ):
@@ -48,14 +52,20 @@ class Network:
                     curr_x = x[curr_idx]
                     curr_d = d[curr_idx]
                     set_targets(out_layer, nout, curr_d)
-                    y = self.training_predict(curr_x)
-                    self.get_output_errors(nout, out_layer)
-                    curr_idx += 1
+                    self.training_predict(curr_x)
+                    self.update_output_errors(nout, out_layer)
                     last_hidden = self.layers[last_idx - 1]
-                    update_output_weights(last_hidden, out_layer, nout, self.eta, self.alpha)
-                    self.update_hidden_weights(last_hidden, out_layer, last_idx)
-            self.e /= (size * nout)
+                    self.update_hidden_deltas(out_layer, last_idx)
+                    curr_idx += 1
+                update_output_weights(last_hidden, out_layer, nout, self.eta, self.alpha)
+                self.update_hidden_weights(last_hidden, out_layer, last_idx)
+                self.reset_errors_and_deltas(nout, out_layer, last_idx)
 
+
+
+
+
+            self.e /= (size * nout)
             print(f"  ** epoch {iter} : e = {self.e}")
             # if self.e <= minJ:
             #     print(f"  >> Stopping training in step {iter}. MSE reached minJ = {minJ}, or lower.\n")
@@ -91,23 +101,35 @@ class Network:
         return size, last_idx, out_layer, nout
 
 
-    def get_output_errors(self, nout, out_layer):
+    def update_output_errors(self, nout, out_layer):
         for n in range(nout):
             node = out_layer.nodes[n]
-            node.e = node.get_error()
-            node.delta = node.e * self.df(node.u)
-            self.e += node.e ** 2
+            e = node.get_error()
+            delta = e * self.df(node.u)
+            node.e += e
+            self.sdeltas[self.nlayers - 2][n] = delta
+            node.delta += delta
+            self.e += e ** 2
+
+
+    def update_hidden_deltas(self, out_layer, last_idx):
+        next_layer = out_layer
+        for l in range(last_idx - 1, 0, -1):
+            curr_layer = self.layers[l]
+            for i in range(curr_layer.n):
+                curr_layer.nodes[i].delta += calculate_delta(
+                    self.df(curr_layer.nodes[i].u), next_layer, self.sdeltas[l], i
+                )
+            next_layer = curr_layer
 
 
     def update_hidden_weights(self, last_hidden, out_layer, last_idx):
         curr_layer = last_hidden
-        next_layer = out_layer
         for l in range(last_idx - 1, 0, -1):
             lsize = curr_layer.n
             previous_layer = self.layers[l - 1]
             for i in range(lsize):
                 node_i = curr_layer.nodes[i]
-                node_i.delta = calculate_delta(self.df(node_i.u), next_layer, i)
                 wprev = node_i.wprev[0]
                 node_i.wprev[0] = node_i.w[0]
                 node_i.w[0] -= self.eta * node_i.delta + self.alpha * wprev
@@ -118,4 +140,14 @@ class Network:
             # if l != 0:
             next_layer = curr_layer
             curr_layer = previous_layer
+
+
+    def reset_errors_and_deltas(self, nout, out_layer, last_idx):
+        for i in range(nout):
+            out_layer.nodes[i].e = 0
+            out_layer.nodes[i].delta = 0
+        for l in range(last_idx - 1, 0, -1):
+            layer = self.layers[l]
+            for i in range(layer.n):
+                layer.nodes[i].delta = 0
 
