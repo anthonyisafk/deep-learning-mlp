@@ -1,7 +1,8 @@
 from neuron import *
 from layer import *
 from activation import *
-from utils import *
+from utils.layer import *
+from utils.training import *
 
 
 class Network:
@@ -42,7 +43,6 @@ class Network:
         size, last_idx, out_layer, nout = self.get_input_output_info(x)
         for iter in range(epochs):
             perm = np.random.permutation(size)
-            # print(perm)
             x, d = x[perm], d[perm]
             curr_idx = 0
             self.e = 0
@@ -52,7 +52,7 @@ class Network:
                     curr_x = x[curr_idx]
                     curr_d = d[curr_idx]
                     set_targets(out_layer, nout, curr_d)
-                    self.training_predict(curr_x)
+                    self.predict(curr_x)
                     self.update_output_errors(nout, out_layer)
                     last_hidden = self.layers[last_idx - 1]
                     self.update_hidden_deltas(out_layer, last_idx)
@@ -60,35 +60,31 @@ class Network:
                 update_output_weights(last_hidden, out_layer, nout, self.eta, self.alpha)
                 self.update_hidden_weights(last_hidden, out_layer, last_idx)
                 self.reset_errors_and_deltas(nout, out_layer, last_idx)
-
-
-
-
-
             self.e /= (size * nout)
             print(f"  ** epoch {iter} : e = {self.e}")
             # if self.e <= minJ:
             #     print(f"  >> Stopping training in step {iter}. MSE reached minJ = {minJ}, or lower.\n")
             #     break
 
-    def training_predict(self, x):
+
+    def predict(self, x):
         y = x
         for i in range(len(x)):
             self.layers[0].nodes[i].y = x[i]
         for i in range(1, self.nlayers):
             # print(y)
-            y = self.training_predict_layer(y, i)
+            y = self.predict_layer(y, i)
         return y
 
 
-    def training_predict_layer(self, x, i):
+    def predict_layer(self, x, i):
         n_i = self.nodes_per_layer[i]
         layer_i = self.layers[i]
         y = np.ndarray(shape=(n_i))
         x = np.concatenate(([-1], x), axis=None)
         for j in range(n_i): # rest of the layers are fully connected.
             node_j = layer_i.nodes[j]
-            node_j.u, node_j.y = training_predict_node(node_j, x)
+            node_j.u, node_j.y = predict_node(node_j, x)
             y[j] = node_j.y
         return y
 

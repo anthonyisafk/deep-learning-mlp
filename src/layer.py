@@ -1,5 +1,5 @@
 from neuron import *
-from utils import check_for_type, initialize_node
+from utils.layer import check_for_type, initialize_node
 
 
 class Layer:
