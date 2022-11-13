@@ -1,4 +1,4 @@
-from network import *
+from classes.network import *
 
 
 def predict_node(node, x):

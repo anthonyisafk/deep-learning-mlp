@@ -1,4 +1,4 @@
-from neuron import *
+from classes.neuron import *
 from utils.layer import check_for_type, initialize_node
 
 

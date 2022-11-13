@@ -1,5 +1,5 @@
-from neuron import *
-from layer import *
+from classes.neuron import *
+from classes.layer import *
 from activation import *
 from utils.layer import *
 from utils.training import *

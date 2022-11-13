@@ -1,4 +1,4 @@
-from neuron import *
+from classes.neuron import *
 
 
 def check_for_layers(nlayers):

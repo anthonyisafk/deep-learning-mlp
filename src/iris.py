@@ -10,7 +10,7 @@ Aristotle University Thessaloniki - School of Informatics.
 """
 
 import pandas as pd
-from network import *
+from classes.network import *
 from utils.testing import *
 
 

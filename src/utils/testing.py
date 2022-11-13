@@ -1,4 +1,4 @@
-from network import *
+from classes.network import *
 
 
 def test_network(x, y, mlp, print_result=True):
