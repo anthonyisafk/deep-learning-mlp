@@ -1,6 +1,17 @@
-import csv
+"""
+Neural Networks & Deep Learning
+Aristotle University Thessaloniki - School of Informatics.
+******************************
+@brief: An *attempt* at making an ANN from scratch.
+        Trained on the `Iris` dataset.
+@author: Antoniou, Antonios - 9482
+@email: aantonii@ece.auth.gr
+2022 AUTh Electrical and Computer Engineering.
+"""
+
 import pandas as pd
 from network import *
+from utils.testing import *
 
 
 train_fraction = 0.7
@@ -8,8 +19,8 @@ minJ = 0.05
 alpha = 2e-6
 theta = 0.0
 eta = 0.025
-epochs = 100
-batch_size = 1
+epochs = 20
+batch_size = 2
 f = activation.tanh
 
 species = {
@@ -68,24 +79,6 @@ def split_trainset_testset(samples, targets):
             y_train = np.concatenate((y_train, targets[v][0:ntrain]))
             y_test = np.concatenate((y_test, targets[v][ntrain:]))
     return x_train, x_test, y_train, y_test
-
-
-def test_network(x, y, mlp, print_result=True):
-    success = 0
-    ntests = len(y)
-    for tx, ty in zip(x, y):
-        res = mlp.training_predict(tx)
-        # print(res)
-        pred = np.argmax(res)
-        target = np.argmax(ty)
-        print(f" -- | {res} | prediction : {pred}, actual y : {target}")
-        if pred == target:
-            success += 1
-
-    if print_result:
-        print(f"\n  >>> Passed {success} / {ntests} tests.")
-    return success / ntests
-
 
 
 if __name__ == "__main__":
