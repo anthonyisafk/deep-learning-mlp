@@ -38,8 +38,8 @@ def main():
     for i in range(nrows):
         y[i, species[df.values[i, ncols-1]]] = 1.0
 
-    samples, targets = split_into_classes(x, y)
-    x_train, x_test, y_train, y_test = split_trainset_testset(samples, targets)
+    samples, targets = split_into_classes(x, y, 3, species)
+    x_train, x_test, y_train, y_test = split_trainset_testset(samples, targets, train_fraction, species)
 
     nin = len(x[0])
     nout = len(y[0])
@@ -48,37 +48,6 @@ def main():
     mlp.train(x_train, y_train, batch_size, epochs, minJ)
 
     test_rate = test_network(x_test, y_test, mlp, True)
-
-
-def split_into_classes(x, y):
-    samples = [[] for _ in range(3)]
-    targets = [[] for _ in range(3)]
-    for v in species.values():
-        indices = np.asarray(y[:, v] == 1.0)
-        samples[v] = x[indices]
-        targets[v] = y[indices]
-    return samples, targets
-
-
-def split_trainset_testset(samples, targets):
-    x_train = []
-    x_test = []
-    y_train = []
-    y_test = []
-    for v in species.values():
-        nv = len(samples[v])
-        ntrain = int(train_fraction * nv)
-        if v == 0:
-            x_train = samples[v][0:ntrain]
-            x_test = samples[v][ntrain:]
-            y_train = targets[v][0:ntrain]
-            y_test = targets[v][ntrain:]
-        else:
-            x_train = np.concatenate((x_train, samples[v][0:ntrain]))
-            x_test = np.concatenate((x_test, samples[v][ntrain:]))
-            y_train = np.concatenate((y_train, targets[v][0:ntrain]))
-            y_test = np.concatenate((y_test, targets[v][ntrain:]))
-    return x_train, x_test, y_train, y_test
 
 
 if __name__ == "__main__":
