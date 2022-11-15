@@ -1,7 +1,7 @@
 from classes.network import *
 
 
-def test_network(x, y, mlp, print_result=True):
+def test_network(x, y, mlp, print_result=False):
     success = 0
     ntests = len(y)
     for tx, ty in zip(x, y):
@@ -9,10 +9,45 @@ def test_network(x, y, mlp, print_result=True):
         # print(res)
         pred = np.argmax(res)
         target = np.argmax(ty)
-        print(f" -- | {res} | prediction : {pred}, actual y : {target}")
+        if print_result:
+            print(f" -- | {res} | prediction : {pred}, actual y : {target}")
         if pred == target:
             success += 1
 
-    if print_result:
-        print(f"\n  >>> Passed {success} / {ntests} tests.")
+    print(f"\n  >>> Passed {success} / {ntests} tests.")
     return success / ntests
+
+
+def split_into_classes(x, y, nlabels, dict=None):
+    samples = [[] for _ in range(nlabels)]
+    targets = [[] for _ in range(nlabels)]
+    if dict is None:
+        dict = {i:i for i in range(nlabels)}
+    for v in dict.values():
+        indices = np.asarray(y[:, v] == 1.0)
+        samples[v] = x[indices]
+        targets[v] = y[indices]
+    return samples, targets
+
+
+def split_trainset_testset(samples, targets, train_fraction, dict=None):
+    x_train = []
+    x_test = []
+    y_train = []
+    y_test = []
+    if dict is None:
+        dict = {i:i for i in range(len(samples))}
+    for v in dict.values():
+        nv = len(samples[v])
+        ntrain = int(train_fraction * nv)
+        if v == 0:
+            x_train = samples[v][0:ntrain]
+            x_test = samples[v][ntrain:]
+            y_train = targets[v][0:ntrain]
+            y_test = targets[v][ntrain:]
+        else:
+            x_train = np.concatenate((x_train, samples[v][0:ntrain]))
+            x_test = np.concatenate((x_test, samples[v][ntrain:]))
+            y_train = np.concatenate((y_train, targets[v][0:ntrain]))
+            y_test = np.concatenate((y_test, targets[v][ntrain:]))
+    return x_train, x_test, y_train, y_test
