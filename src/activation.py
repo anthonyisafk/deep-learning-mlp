@@ -5,6 +5,7 @@ from mpmath import sech
 
 alpha = 1.7159
 beta = 2 / 3
+ab = alpha * beta
 
 class activation(Enum):
     identity = 0
@@ -16,7 +17,7 @@ class activation(Enum):
 def identity(x):
     return x
 def didentity(x):
-    return 0
+    return 1
 
 
 def relu(x):
@@ -28,7 +29,7 @@ def drelu(x):
 def tanh(x):
     return alpha * np.tanh(beta * x)
 def dtanh(x): # d(atanh(bx))/dx = ab(sech(bx))^2
-    return alpha * beta * sech(beta * x) ** 2
+    return ab * sech(beta * x) ** 2
 
 
 def logistic(x):
