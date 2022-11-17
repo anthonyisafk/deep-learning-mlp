@@ -54,9 +54,9 @@ class Network:
                     set_targets(out_layer, nout, curr_d)
                     self.predict(curr_x)
                     self.update_output_errors(nout, out_layer)
-                    last_hidden = self.layers[last_idx - 1]
                     self.update_hidden_deltas(out_layer, last_idx)
                     curr_idx += 1
+                last_hidden = self.layers[last_idx - 1]
                 update_output_weights(last_hidden, out_layer, nout, self.eta, self.alpha)
                 self.update_hidden_weights(last_hidden, last_idx)
                 self.reset_errors_and_deltas(nout, out_layer, last_idx)
