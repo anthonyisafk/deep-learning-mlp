@@ -15,7 +15,7 @@ class Network:
     alpha:np.float32           # momentum constant
     e:np.float32               # total error
     acc:np.float32             # accuracy percentage
-    sdeltas:np.ndarray        # table of deltas for a single sample.
+    sdeltas:np.ndarray         # table of deltas for a single sample.
 
 
     def __init__(self, nodes, eta, theta, alpha, f:activation):
@@ -58,7 +58,7 @@ class Network:
                     self.update_hidden_deltas(out_layer, last_idx)
                     curr_idx += 1
                 update_output_weights(last_hidden, out_layer, nout, self.eta, self.alpha)
-                self.update_hidden_weights(last_hidden, out_layer, last_idx)
+                self.update_hidden_weights(last_hidden, last_idx)
                 self.reset_errors_and_deltas(nout, out_layer, last_idx)
             self.e /= (size * nout)
             print(f"  ** epoch {iter} : e = {self.e}")
@@ -119,7 +119,7 @@ class Network:
             next_layer = curr_layer
 
 
-    def update_hidden_weights(self, last_hidden, out_layer, last_idx):
+    def update_hidden_weights(self, last_hidden, last_idx):
         curr_layer = last_hidden
         for l in range(last_idx - 1, 0, -1):
             lsize = curr_layer.n
@@ -134,7 +134,6 @@ class Network:
                     node_i.wprev[j + 1] = node_i.w[j + 1]
                     node_i.w[j + 1] += self.eta * node_i.delta * previous_layer.nodes[j].y + self.alpha * wprev
             # if l != 0:
-            next_layer = curr_layer
             curr_layer = previous_layer
 
 
