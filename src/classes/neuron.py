@@ -48,7 +48,7 @@ class Neuron:
 
 
     def get_error(self):
-        return self._d - self._y;
+        return self._d - self._y
 
     # Properties that need to be turned `private`, to create setters. #
 
