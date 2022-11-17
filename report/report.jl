@@ -23,12 +23,15 @@ md"""
 # ╔═╡ ed01e67c-0da0-4da9-932e-12df24523f15
 md"""
 ## Purpose
+
 In the first assignment of the Deep Learning course, our goal is to make a Neural Network **(NN)**, of any architecture, built for classification of problems with many classes (i.e. not a binary classifier). The selected one was a Multilayer Perceptron **(MLP)**, that is the simplest and most easily digestible of all, so we can dive deeper into the mathematic side of the project and have time to develop it all from scratch.
 \
 Before we start dissecting the algorithm into its components, we need to make sure we reminded ourselves of the most important terms, briefly.
 
 ## Terminology recap
+
 #### What is a Perceptron?
+
 A Perceptron is an entity simulating the function of a **neuron** in the human brain. In that sense, it simply accumulates information from sources before it (for which it has different **"weights"**, or degrees of **significance**), it processes it (that is, applies a certain arithmetic operation on all the collected data), and passes the output to the neurons that are connected to it afterwards. We can look at a Perceptron like this:
 
 $(LocalResource(
@@ -43,7 +46,7 @@ $(LocalResource(
 
 # ╔═╡ 6d0a0338-87d7-40db-9b0b-bcbc317b2386
 md"""
-We refer to $f(\cdot)$ as the **activation function** of the Percpetron. It is used to keep the output on a relatively predictable range and filter out insignificant inputs, but also filter in significant ones.
+We refer to $f(\cdot)$ as the **activation function** of the Perceptron. It is used to keep the output on a relatively predictable range and filter out insignificant inputs, but also filter in significant ones.
 \
 **Note**: Oftentimes, as well as on this project, the $x_{0}$ and $w_{j,0}$ parameters belong to the **bias**: An *offset* to the inputs that either trainable, or given explicitely by the designer.
 """
@@ -51,6 +54,7 @@ We refer to $f(\cdot)$ as the **activation function** of the Percpetron. It is u
 # ╔═╡ 848293d0-3e64-4782-ab26-dfc855870254
 md"""
 #### Multilayer perceptrons
+
 MLP's are simply layers of Perceptrons connected with each other, to make a structure that's capable of solving problems, or approximating functions that are non-linear and complex in general. They are:
 * Fully connected: All neurons in layer $i$ communicate with all neurons in layer $i+1$.
 * Feedforward: Information, other than errors, travels to the next layers and never comes back.
@@ -59,13 +63,15 @@ We will delve into the details, by explaining the structure of the MLP factory t
 
 # ╔═╡ a50be0ca-fa46-43cc-9a5e-6c2b3d7c8058
 md"""
-#### Coding and training an MLP
+## Coding and training an MLP
+
 We split the classifier into its basic entities, that we turned into Python classes. This admittedly made the program a little less efficient, and the parameter changes a little longer to write. However, efficient libraries for Deep Learning have already been written. The reasons behind that Object-Oriented approach are pretty simple. First, it's a habit! Secondly, it makes the algorithm written a lot more readable, easier to debug and fully understand, since that's the bottom line of the project in question.
 \
-Having gotten that out of the way, we will now briefly explain the functionality of each of the 3 classes that the classifier is comrised of.
+Having gotten that out of the way, we will now briefly explain the functionality of each of the 3 classes that the classifier is comprised of.
 
 ##### Neuron
-This is the modelling of the Perceptron, explained above. **It will also be reffered to as a *Node*,** like it belongs to a directed graph. For the Neuron to be capable of being trained their is a myriad of attributes and inbetween values to be kept and updated during each iteration of testing.
+
+This is the modelling of the Perceptron, explained above. **It will also be reffered to as a *Node*,** like it belongs to a directed graph. For the Neuron to be capable of being trained there is a myriad of attributes and inbetween values to be kept and updated during each iteration of testing.
 \
 First and foremost, a Node needs to know if it belongs to the input, output or any hidden layer. In the first case, it only broadcasts the value given to it to every Node in the first hidden layer. In the latter case, it needs to keep track of the target value given to it, and compare it to the one that it output. Output Nodes calculate their error $e$, and $\delta$ value, that are kept as attributes:
 ```python
@@ -75,37 +81,38 @@ def get_error(self):
 ```python
 delta = e * self.df(node.u)
 ```
-As you can see, the Neuron has also stored a `callable` for activation function `f` and its derivative `df`, along with:
+As you can see, the Neuron has also stored a `callable` for activation function *`f`* and its derivative *`df`*, along with:
 \
 $y=f(u)$, for which
 \
 $u=\underline{w}\cdot\underline{x}$
 \
-The $\underline{w}$ vector is kept internally, for each Neuron, along with the weights before the current iteration of training, for reason we will explore later on. For the sake of consistency, the rest of the class attributes will be listed here, and also explained later:
+The $\underline{w}$ vector is kept internally, for each Neuron, along with the weights before the current iteration of training, for reasons we will explore later on. For the sake of consistency, the rest of the class attributes will be listed here, and also explained later:
 * ID's for the layer it lies in, and an its own ID inside the layer,
 * The learning rate $\eta$
 * The target $d$ (allocated and initialized in case of an output neuron)
 * The number of inputs $n_{in}$
 """
 
-# ╔═╡ 192360c5-ffee-49fc-ba16-977a62b3ed32
-md"""
-##### Layer
-The Layer class is a wrapper around the array of Nodes that make it up. It contains the number of Nodes of the curent and the previous layer, essentially kept so that the data can be passed on to the constructor of each Node. It also contains the type $t$ of layer it is (once again, input, output, or hidden) and the layer ID it comes with.
-\
-All in all, its function is to simply organize Neurons into arrays, so they can process information both during predicting and training in a more easy-to-track way.
-"""
-
 # ╔═╡ b55ce313-94d6-4a68-8b13-c344b22fddba
 md"""
+##### Layer
+
+The Layer class is a wrapper around the array of Nodes that make it up. It contains the number of Nodes of the current and the previous layer, essentially kept so that the data can be passed on to the constructor of each Node. It also contains the type $t$ of layer it is (once again, input, output, or hidden) and the layer ID it comes with.
+\
+All in all, its function is to simply organize Neurons into arrays, so they can process information both during predicting and training in a more easy-to-track way.
+
 ##### Network
+
 It encapsulates all the attributes and routines an MLP needs to be constructed, trained, tested and used. Apart from the attributes engrained in the array of Layers (and subsequently the arrays of Nodes), it also has:
 * The $\alpha$ momentum factor,
 * The resulting accuracy,
 * The total error $e^{'}$, and
 * The array of the resulting $\delta$ values for each Neuron of the Network, for a single sample during training, $sdeltas$. 
-The class implements the `predict()`, `train()` and `test()` functions.
+The class implements the *`predict()`*, *`train()`* and *`test()`* functions.
+
 ###### Predict
+
 Function signature:
 ```python
 def predict(self, x)
@@ -115,7 +122,7 @@ We create an array $y=x$. For the first layer, we simply assign:
 for i in range(len(x)):
 	self.layers[0].nodes[i].y = x[i]
 ```
-For the rest of them, we use the same $y$ vector to place the result in. The output of layer $i$ is the input of layer $i+1$, until the output layer is reached. As usual, for each Neuron of the layer, $u$ is calculated first, then $y$ is extracted. The function returns the entirety of $\underline{y}$, so we can keep all the probability values that the output Neurons concluded in. If `classes` is the array of available classification options, this means that in the occassion that `index_of(max(y)) = i`, then **`classes[i]`** is the decision the Network has made.
+For the rest of them, we use the same $y$ vector to place the result in. The output of layer $i$ is the input of layer $i+1$, until the output layer is reached. As usual, for each Neuron of the layer, $u$ is calculated first, then $y$ is extracted. The function returns the entirety of $\underline{y}$, so we can keep all the probability values that the output Neurons concluded in. If *`classes`* is the array of available classification options, this means that in the occassion that *`index_of(max(y)) = i`*, then **`classes[i]`** is the decision the Network has made.
 ###### Train
 Function signature:
 ```python
@@ -136,17 +143,13 @@ for iter in range(epochs):
 			set_targets(out_layer, nout, curr_d)
 			self.predict(curr_x)
 			self.update_output_errors(nout, out_layer)
-			last_hidden = self.layers[last_idx - 1]
 			self.update_hidden_deltas(out_layer, last_idx)
 			curr_idx += 1
+		last_hidden = self.layers[last_idx - 1]
 		update_output_weights(last_hidden, out_layer, nout, self.eta, self.alpha)
 		self.update_hidden_weights(last_hidden, out_layer, last_idx)
 		self.reset_errors_and_deltas(nout, out_layer, last_idx)
 ```
-"""
-
-# ╔═╡ 70e087c7-f34f-4b3f-9073-859b3927b405
-md"""
 The routine is given the inputs $x$, and target outputs $d$ of the dataset it will be trained on. We also supply:
 * The *batch size*, which is the number of samples the Network makes a prediction and calculates $e$ and $\delta$ values for,
 * The *epochs*, which is the number of iterations of training throughout all samples,
@@ -155,31 +158,46 @@ The routine is given the inputs $x$, and target outputs $d$ of the dataset it wi
 1. As one could guess, the batch size is kept consistent until we've reached the last batch. In that case, the batch-specific size is either the same, or the remainder of the samples, after we've gone through the rest
 2. We will break down the training procedure into epochs. Every epoch requires the same processes and calculations, so all we need is to describe the progression of the algorithm during just one.
 3. During each epoch, the initial inputs and targets are shuffled using the same permutation of indices, so we can keep the Network from overfitting. 
+
+When the Network is first made, the weights are randomly initialized. However, since symmetry has to be avoided, the weights are given by a random generator following a **uniform distribution between 0 and 1**.
 \
 For every sample $p$, the output nodes are informed about the target values they are supposed to output. The `predict()` function is called, and directly every output Node's error is calculated, together with $\delta$, like shown above. For the rest, hidden, nodes, we need to calculate $\delta$ once again, but differently this time.
 \
 Let's take Node $n_{i}^{(l)}$ as an example. The notation means we're dealing with the Node with $ID=i$, on layer $l$:
 * $\delta=\dot{f}(u)\cdot\sum_{j=1}^{N(l+1)}(\delta_{j}^{l+1}\cdot w_{j,i})$
-When it cpmes to the implementation in Python, that's what we need the $sdeltas$ array, that keeps track of $\delta$ each Neuron calculates, layer by layer, so that the error can be propagated to the previous layer, up until we've reached the first hidden nodes. That is **Back Propagation (BK)**:
+When it comes to the implementation in Python, that's what we need the $sdeltas$ array, that keeps track of $\delta$ each Neuron calculates, layer by layer, so that the error can be propagated to the previous layer, up until we've reached the first hidden nodes. That is **Back Propagation (BK)**:
 ```python
 for j in range(next_layer.n):
 	delta += next_layer_deltas[j] * next_layer.nodes[j].w[i + 1]
 return dfu * delta
 ```
-We use `w[i+1]`, since `w[0]` is **reserved** for the **bias** of each Neuron.
+We use *`w[i+1]`*, since *`w[0]`* is **reserved** for the **bias** of each Neuron.
 \
 As can be seen in the last 3 lines of code, every time we've examined enough samples, it's time to update the weights of the Network, then reset all the values that relate to errors: $e$ and $\delta$ for all Nodes.
 \
-Regarding the weight update, once we've gone through `b_size` of samples, summing up errors and $\delta$'s we calculate for Neuron $i$, on layer $l$:
-* $w_{i,j}=w{i,j}+\eta\cdot\delta_{i}^{l}+y_{j}^{l-1}+\alpha\cdot previous\_w_{i,j}$
-This is what we need `wprev`, the array of weights before the current iteration, that we talked about earlier:
+Regarding the weight update, once we've gone through *`b_size`* of samples, summing up errors and $\delta$'s we calculate for Neuron $i$, on layer $l$:
+* $new\_w_{i,j}=w_{i,j}+\eta\cdot\delta_{i}^{l}+y_{j}^{l-1}+\alpha\cdot previous\_w_{i,j}$
+This is what we need *`wprev`* for, the array of weights before the current iteration, that we talked about earlier:
 ```python
 for j in range(node_i.n_in):
 	wprev = node_i.wprev[j + 1]
 	node_i.wprev[j + 1] = node_i.w[j + 1]
 	node_i.w[j + 1] += eta * node_i.delta * last_hidden.nodes[j].y + alpha * wprev
 ```
+
 ###### Testing
+	
+Lastly, there is a decision to make on the division of the data. Generally speaking, we give 60% of the data to the Network to train and keep 40% for testing. We have to pay special attention to pre-processing: the training data is shuffled before every epoch, but we need to make sure we keep a balance between the samples of different classes the Network trains on. There is a significant possibility of **overfitting**, with a bias towards the class that had the most training samples.
+\
+Here is an example of how that was handled using the [Iris dataset](https://www.kaggle.com/datasets/uciml/iris?resource=download):
+```python
+samples, targets = split_into_classes(x, y, 3, species)
+x_train, x_test, y_train, y_test = 
+	split_trainset_testset(samples, targets, train_fraction, species)
+```
+Here, the *`split_into_classes`* function uses the *`species`* dictionary to split the classes of the dataset into different arrays inside *`samples`*.
+\
+Afterwards, *`split_trainset_testset`*, takes approximately a percentage of each sample class equal to *`train_fraction`* and places them all into *`x_train`* (and the respective targets into *`y_train`*). The rest goes into the tests.
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -408,12 +426,10 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╔═╡ Cell order:
 # ╟─a8c95550-65bb-11ed-0ff5-d16dfa289d86
 # ╟─ce9501b4-2755-4d48-8c19-41fe22216078
-# ╠═ed01e67c-0da0-4da9-932e-12df24523f15
+# ╟─ed01e67c-0da0-4da9-932e-12df24523f15
 # ╟─6d0a0338-87d7-40db-9b0b-bcbc317b2386
-# ╠═848293d0-3e64-4782-ab26-dfc855870254
-# ╠═a50be0ca-fa46-43cc-9a5e-6c2b3d7c8058
-# ╠═192360c5-ffee-49fc-ba16-977a62b3ed32
-# ╠═b55ce313-94d6-4a68-8b13-c344b22fddba
-# ╠═70e087c7-f34f-4b3f-9073-859b3927b405
+# ╟─848293d0-3e64-4782-ab26-dfc855870254
+# ╟─a50be0ca-fa46-43cc-9a5e-6c2b3d7c8058
+# ╟─b55ce313-94d6-4a68-8b13-c344b22fddba
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
