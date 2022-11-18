@@ -3,6 +3,7 @@ from classes.layer import *
 from activation import *
 from utils.layer import *
 from utils.training import *
+import time
 
 
 class Network:
@@ -40,31 +41,42 @@ class Network:
 
 
     def train(self, x, d, batch_size, epochs, minJ):
+        fmt = "  * Epoch {} [{:.2} secs.]: e = {:.2}, accuracy = {:.2}"
+        train_start = time.time()
         size, last_idx, out_layer, nout = self.get_input_output_info(x)
         for iter in range(epochs):
+            epoch_start = time.time()
             perm = np.random.permutation(size)
             x, d = x[perm], d[perm]
             curr_idx = 0
-            self.e = 0
+            self.e = 0.0
+            self.acc = 0.0
             for b in range(0, size, batch_size):
                 b_size = min(batch_size, size - b)
                 for p in range(b_size):
                     curr_x = x[curr_idx]
                     curr_d = d[curr_idx]
                     set_targets(out_layer, nout, curr_d)
-                    self.predict(curr_x)
+                    y = self.predict(curr_x)
                     self.update_output_errors(nout, out_layer)
                     self.update_hidden_deltas(out_layer, last_idx)
+                    if np.argmax(y) == np.argmax(curr_d):
+                        self.acc += 1
                     curr_idx += 1
                 last_hidden = self.layers[last_idx - 1]
                 update_output_weights(last_hidden, out_layer, nout, self.eta, self.alpha)
                 self.update_hidden_weights(last_hidden, last_idx)
                 self.reset_errors_and_deltas(nout, out_layer, last_idx)
             self.e /= (size * nout)
-            print(f"  ** epoch {iter} : e = {self.e}")
+            self.acc /= size
+            epoch_end = time.time() - epoch_start
+            print(fmt.format(iter, epoch_end, self.e, self.acc))
             # if self.e <= minJ:
             #     print(f"  >> Stopping training in step {iter}. MSE reached minJ = {minJ}, or lower.\n")
             #     break
+        train_time = time.time() - train_start
+        print(f"\n  >> Training took {train_time:.2} secs. for {epochs} epochs.")
+        print(f"   -- Accuracy : {self.acc:.2}\n")
 
 
     def predict(self, x):
