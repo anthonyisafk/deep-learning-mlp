@@ -38,16 +38,17 @@ def split_trainset_testset(samples, targets, train_fraction, dict=None):
     if dict is None:
         dict = {i:i for i in range(len(samples))}
     for v in dict.values():
-        nv = len(samples[v])
+        iv = int(v)
+        nv = len(samples[iv])
         ntrain = int(train_fraction * nv)
-        if v == 0:
-            x_train = samples[v][0:ntrain]
-            x_test = samples[v][ntrain:]
-            y_train = targets[v][0:ntrain]
-            y_test = targets[v][ntrain:]
+        if len(x_train) == 0:
+            x_train = samples[iv][0:ntrain]
+            x_test = samples[iv][ntrain:]
+            y_train = targets[iv][0:ntrain]
+            y_test = targets[iv][ntrain:]
         else:
-            x_train = np.concatenate((x_train, samples[v][0:ntrain]))
-            x_test = np.concatenate((x_test, samples[v][ntrain:]))
-            y_train = np.concatenate((y_train, targets[v][0:ntrain]))
-            y_test = np.concatenate((y_test, targets[v][ntrain:]))
+            x_train = np.concatenate((x_train, samples[iv][0:ntrain]))
+            x_test = np.concatenate((x_test, samples[iv][ntrain:]))
+            y_train = np.concatenate((y_train, targets[iv][0:ntrain]))
+            y_test = np.concatenate((y_test, targets[iv][ntrain:]))
     return x_train, x_test, y_train, y_test
