@@ -17,10 +17,10 @@ from utils.testing import *
 
 train_fraction = 0.6
 minJ = 0.05
-alpha = 1e-4
+alpha = 4e-4
 theta = 0.0
-eta = 0.05
-epochs = 20
+eta = 0.08
+epochs = 100
 batch_size = 1
 f = activation.logistic
 
@@ -47,17 +47,17 @@ def main():
         y[i, labels[df.values[i, ncols-1]]] = 1.0
 
     samples, targets = split_into_classes(x, y, nlabels, labels)
-    frequencies = np.zeros(shape=(nlabels))
-    for i in range(nlabels):
-        frequencies[i] = len(targets[i])
-    max_freq = np.max(frequencies)
-    ncopies = [int(np.ceil(max_freq / f)) - 1 for f in frequencies]
-    for i in range(nlabels):
-        scopy = samples[i]
-        tcopy = targets[i]
-        for _ in range(ncopies[i]):
-            samples[i] = np.concatenate((samples[i], scopy))
-            targets[i] = np.concatenate((targets[i], tcopy))
+    # frequencies = np.zeros(shape=(nlabels))
+    # for i in range(nlabels):
+    #     frequencies[i] = len(targets[i])
+    # max_freq = np.max(frequencies)
+    # ncopies = [int(np.ceil(max_freq / f)) - 1 for f in frequencies]
+    # for i in range(nlabels):
+    #     scopy = samples[i]
+    #     tcopy = targets[i]
+    #     for _ in range(ncopies[i]):
+    #         samples[i] = np.concatenate((samples[i], scopy))
+    #         targets[i] = np.concatenate((targets[i], tcopy))
     x_train, x_test, y_train, y_test = split_trainset_testset(samples, targets, train_fraction, labels)
 
 
@@ -70,7 +70,7 @@ def main():
     mlp = Network(nodes, eta, theta, alpha, f)
     mlp.train(x_train, y_train, batch_size, epochs, minJ)
 
-    test_rate = test_network(x_test, y_test, mlp, True)
+    test_rate = test_network(x_test, y_test, mlp)
 
 
 if __name__ == '__main__':
