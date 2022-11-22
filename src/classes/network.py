@@ -41,7 +41,8 @@ class Network:
 
 
     def train(self, x, d, batch_size, epochs, minJ):
-        fmt = "  * Epoch {} [{:.2} secs.]: e = {:.2}, accuracy = {:.2}"
+        print("  < - - - - - Training MLP... - - - - - >\n")
+        fmt = "  - Epoch {} [{:3.2} secs.]: e = {:.2}, accuracy = {:.3}"
         train_start = time.time()
         size, last_idx, out_layer, nout = self.get_input_output_info(x)
         for iter in range(epochs):
@@ -71,12 +72,13 @@ class Network:
             self.acc /= size
             epoch_end = time.time() - epoch_start
             print(fmt.format(iter, epoch_end, self.e, self.acc))
-            # if self.e <= minJ:
-            #     print(f"  >> Stopping training in step {iter}. MSE reached minJ = {minJ}, or lower.\n")
-            #     break
+            if self.e <= minJ:
+                print(f"  >> Stopping training in step {iter}. MSE reached minJ = {minJ}, or lower.\n")
+                break
         train_time = time.time() - train_start
-        print(f"\n  >> Training took {train_time:.2} secs. for {epochs} epochs.")
-        print(f"   -- Accuracy : {self.acc:.2}\n")
+        print("  < - - - - - Completed training. - - - - - >\n")
+        print(f"  >> Training took {train_time:4.2} secs. for {iter + 1} epochs.")
+        print(f"   * Accuracy : {self.acc:.3}\n")
 
 
     def predict(self, x):
