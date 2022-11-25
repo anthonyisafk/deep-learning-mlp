@@ -68,7 +68,7 @@ class Network:
                 update_output_weights(last_hidden, out_layer, nout, self.eta, self.alpha)
                 self.update_hidden_weights(last_hidden, last_idx)
                 self.reset_errors_and_deltas(nout, out_layer, last_idx)
-            self.e /= (size * nout)
+            self.e = np.sqrt(self.e / size / nout)
             self.acc /= size
             epoch_end = time.time() - epoch_start
             print(fmt.format(iter, epoch_end, self.e, self.acc))
