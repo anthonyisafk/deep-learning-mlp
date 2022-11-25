@@ -11,7 +11,7 @@ def check_for_layers(nlayers):
 def initialize_node(i, lid, t, eta, theta, n_prev, f, df):
     if t != 'i':
         np.random.seed(i * lid)
-        w = np.random.uniform(size=(n_prev + 1))
+        w = np.random.uniform(low=-2, high=2, size=(n_prev + 1))
         w[0] = theta
         return Neuron(i, lid, w, t, eta, f, df)
     else:
