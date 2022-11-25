@@ -22,7 +22,7 @@ md"""
 
 # ╔═╡ ed01e67c-0da0-4da9-932e-12df24523f15
 md"""
-## Purpose
+## Introduction
 
 In the first assignment of the Deep Learning course, our goal is to make a Neural Network **(NN)**, of any architecture, built for classification of problems with many classes (i.e. not a binary classifier). The selected one was a Multilayer Perceptron **(MLP)**, that is the simplest and most easily digestible of all, so we can dive deeper into the mathematic side of the project and have time to develop it all from scratch.
 \
@@ -198,6 +198,11 @@ x_train, x_test, y_train, y_test =
 Here, the *`split_into_classes`* function uses the *`species`* dictionary to split the classes of the dataset into different arrays inside *`samples`*.
 \
 Afterwards, *`split_trainset_testset`*, takes approximately a percentage of each sample class equal to *`train_fraction`* and places them all into *`x_train`* (and the respective targets into *`y_train`*). The rest goes into the tests.
+
+##### Acknowledgement
+
+Any of the proposed models seem to be performing sub-par for non-linearly separable datasets. The loss function is minimized, however it soon reaches a plateau and takes considerable time in order to "escape" that region. All in all, the MLP works pretty well with linearly separable classes, such as [Iris](https://www.kaggle.com/datasets/uciml/iris?resource=download).
+
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -430,6 +435,6 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─6d0a0338-87d7-40db-9b0b-bcbc317b2386
 # ╟─848293d0-3e64-4782-ab26-dfc855870254
 # ╟─a50be0ca-fa46-43cc-9a5e-6c2b3d7c8058
-# ╟─b55ce313-94d6-4a68-8b13-c344b22fddba
+# ╠═b55ce313-94d6-4a68-8b13-c344b22fddba
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
