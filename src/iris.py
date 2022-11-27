@@ -10,18 +10,30 @@ Aristotle University Thessaloniki - School of Informatics.
 """
 
 import pandas as pd
+import logging
+from sklearn.preprocessing import normalize
 from classes.network import *
 from utils.testing import *
 
-
-train_fraction = 0.7
+train_fraction = 0.6
 minJ = 0.05
-alpha = 2e-6
+min_acc = 0.95
+alpha = 0.0005
 theta = 0.0
-eta = 0.025
-epochs = 20
-batch_size = 2
-f = activation.tanh
+eta = 0.05
+epochs = 100
+batch_size = 1
+f = [activation.logistic, activation.logistic]
+f1 = 'l'
+f2 = 'l'
+
+logname = "acc95.log"
+logging.basicConfig(
+    filename=logname,
+    filemode='a',
+    level=logging.INFO,
+    format='%(message)s'
+)
 
 species = {
     'Iris-setosa': 0,
@@ -37,17 +49,20 @@ def main():
     y = np.zeros(shape=(nrows,3))
     for i in range(nrows):
         y[i, species[df.values[i, ncols-1]]] = 1.0
+    x = normalize(x)
 
     samples, targets = split_into_classes(x, y, 3, species)
     x_train, x_test, y_train, y_test = split_trainset_testset(samples, targets, train_fraction, species)
 
     nin = len(x[0])
     nout = len(y[0])
-    nodes = [nin, 7, nout]
+    nodes = [nin, nin + nout, nout]
     mlp = Network(nodes, eta, theta, alpha, f)
-    mlp.train(x_train, y_train, batch_size, epochs, minJ)
+    training_acc = mlp.train(x_train, y_train, batch_size, epochs, minJ, min_acc)
 
-    test_rate = test_network(x_test, y_test, mlp, True)
+    testing_acc = test_network(x_test, y_test, mlp, False)
+
+    logging.info(f"{eta},{alpha},{f1},{f2},{training_acc:.3},{testing_acc:.3}")
 
 
 if __name__ == "__main__":
