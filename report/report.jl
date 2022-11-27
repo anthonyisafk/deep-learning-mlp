@@ -18,6 +18,7 @@ md"""
 ### Assignment 1: Multilayer Perceptron
 #### Antoniou, Antonios - 9482
 #### aantonii@ece.auth.gr
+[GitHub repository can be found here](https://github.com/anthonyisafk/deep-learning-mlp)
 """
 
 # ╔═╡ ed01e67c-0da0-4da9-932e-12df24523f15
@@ -153,13 +154,14 @@ for iter in range(epochs):
 The routine is given the inputs $x$, and target outputs $d$ of the dataset it will be trained on. We also supply:
 * The *batch size*, which is the number of samples the Network makes a prediction and calculates $e$ and $\delta$ values for,
 * The *epochs*, which is the number of iterations of training throughout all samples,
-* The *minJ* parameter, which is the value of the *loss function* at which the Network stops training, because we deem it reached a level of correctness we are satisfied with.
+* The *minJ* parameter, which is the value of the *loss function* at which the Network stops training, because we deem it reached a level of correctness we are satisfied with,
+* The *min_acc* parameter, which denotes the accuracy level that is good enough for the classifier.
 **Remarks**:
 1. As one could guess, the batch size is kept consistent until we've reached the last batch. In that case, the batch-specific size is either the same, or the remainder of the samples, after we've gone through the rest
 2. We will break down the training procedure into epochs. Every epoch requires the same processes and calculations, so all we need is to describe the progression of the algorithm during just one.
 3. During each epoch, the initial inputs and targets are shuffled using the same permutation of indices, so we can keep the Network from overfitting. 
 
-When the Network is first made, the weights are randomly initialized. However, since symmetry has to be avoided, the weights are given by a random generator following a **uniform distribution between 0 and 1**.
+When the Network is first made, the weights are randomly initialized. However, since symmetry has to be avoided, the weights are given by a random generator following a **uniform distribution between -2 and 2**.
 \
 For every sample $p$, the output nodes are informed about the target values they are supposed to output. The `predict()` function is called, and directly every output Node's error is calculated, together with $\delta$, like shown above. For the rest, hidden, nodes, we need to calculate $\delta$ once again, but differently this time.
 \
@@ -203,6 +205,92 @@ Afterwards, *`split_trainset_testset`*, takes approximately a percentage of each
 
 Any of the proposed models seem to be performing sub-par for non-linearly separable datasets. The loss function is minimized, however it soon reaches a plateau and takes considerable time in order to "escape" that region. All in all, the MLP works pretty well with linearly separable classes, such as [Iris](https://www.kaggle.com/datasets/uciml/iris?resource=download).
 
+##### Training with the Iris dataset
+
+The main activation functions to have been implemented were **tanh**, **logistic** and **relu**. The dataset was through of series of tests with combinations of activation functions and hyperparameters (that can be also found in tabular form in the GitHub repository). `f1` is the activation function on the hidden layer, and `f2` is the respective function of the output layer.
+
+$(LocalResource(
+	"./image/ll.png",
+	:style => "width: 350px;
+			   text-align: center;
+			   display: block;
+			   margin-left: auto;
+			   margin-right: auto;
+               margin-bottom: auto;"
+))
+
+$(LocalResource(
+	"./image/tt.png",
+	:style => "width: 300px;
+			   text-align: left;"
+))
+
+$(LocalResource(
+	"./image/lr.png",
+	:style => "width: 300px;
+			   text-align: right;"
+))
+"""
+
+# ╔═╡ 4eee32cd-92c4-4441-b634-918051794ffe
+md"""
+Clearly, the **logistic function** performs better and is a little more **robust** towards the different hyperparameters the Network is given to train with. It took only 3 experiments to see that using the Iris dataset with relu on the output is overkill and doesn't result in convergence.
+
+Now that we know that the logistic function performs better, the next step is experimenting with **early stopping**. The next experiments show the number of epochs it took before the Network reaches an accuracy of **95%** on the training dataset, and what that meant for the testing accuracy percentage:
+
+| eta  | alpha  | train acc. | test acc. |  epochs  |
+| ---- | ------ | ---------- | --------- | -------- |
+| 0.05 | 0.0001 | 0.967      | 0.967     | 81       |
+| 0.05 | 0.0002 | 0.956      | 0.967     | 60       |
+| 0.05 | 0.0003 | 0.956      | 0.933     | 44       |
+| 0.05 | 0.0004 | 0.967      | 0.967     | 37       |
+| 0.05 | 0.0005 | 0.956      | 0.933     | 29       |
+| 0.1  | 0.0001 | 0.956      | 0.95      | 59       |
+| 0.1  | 0.0002 | 0.956      | 0.933     | 44       |
+| 0.1  | 0.0003 | 0.956      | 0.933     | 29       |
+| 0.1  | 0.0004 | 0.956      | 0.95      | 30       |
+| 0.1  | 0.0005 | 0.967      | 0.967     | 29       |
+
+The rest of the table can be found on _**acc95.csv**_. The two values of $\eta$, paired with the five combinations of $\alpha$, are enough to show that, even if convergence is quick, a greater value for the momentum factor can result to less accurate predictions, provided that the learning rate isn't sufficiently greater.
+
+##### KNN and Nearest Centroid Classifiers
+
+A more aggressive division of data was used (80% for training and 20% for testing) for two KNN Classifiers (with number of neighbors equal to 1 and equal to 3), and a Nearest Centroid Classifier.
+
+Below are the results of the tests:
+```
+  >> Fit model for Nearest Centroid Classifier : 0.0010 sec.
+   >>> NearestCentroidClassifier : 66.667 accuracy.
+```
+
+```
+  >> Fit model for number of neighbors : 1 [0.0010 sec.]
+  >> Fit model for number of neighbors : 3 [0.0000 sec.]
+
+   >>> KNeighborsClassifier with n_neighbors=1 : 70.000 accuracy.
+   >>> KNeighborsClassifier with n_neighbors=3 : 70.000 accuracy.
+```
+
+The average MLP training time (without early stopping, and one hidden layer) is 2.9 seconds. While this still isn't much, it is entire orders of magnitude larger than the training times above. However, the MLP averages an accuracy above 95% on a larger testing dataset.
+
+The differences in time can be better viewed on the [Dry Bean](https://www.kaggle.com/datasets/gauravduttakiit/dry-bean-classification?select=train_dataset.csv) dataset, that consists of 2500 samples. The simpler classifiers still take less than a second to train:
+```
+  >> Fit model for Nearest Centroid Classifier : 0.0010 sec.
+   >>> NearestCentroidClassifier : 61.431 accuracy.
+```
+
+An MLP with one hidden layer and the `logistic` function (that performs much better than `tanh`), takes over 3 seconds for a single epoch (with disappointing results):
+```
+  - Epoch 0 [3.3 secs.]: e = 0.81, accuracy = 0.154
+  - Epoch 1 [4.1 secs.]: e = 0.78, accuracy = 0.149
+  - Epoch 2 [3.2 secs.]: e = 0.78, accuracy = 0.144
+  - Epoch 3 [3.5 secs.]: e = 0.78, accuracy = 0.146
+```
+
+**Note**: More details on the training of the `Dry Bean` and `Red Wine` datasets can be found in the `logs` directory of the repository.
+
+#### Thank you for your time!
+###### Antoniou, Antonios
 """
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -435,6 +523,7 @@ uuid = "3f19e933-33d8-53b3-aaab-bd5110c3b7a0"
 # ╟─6d0a0338-87d7-40db-9b0b-bcbc317b2386
 # ╟─848293d0-3e64-4782-ab26-dfc855870254
 # ╟─a50be0ca-fa46-43cc-9a5e-6c2b3d7c8058
-# ╠═b55ce313-94d6-4a68-8b13-c344b22fddba
+# ╟─b55ce313-94d6-4a68-8b13-c344b22fddba
+# ╟─4eee32cd-92c4-4441-b634-918051794ffe
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
