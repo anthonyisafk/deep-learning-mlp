@@ -17,8 +17,8 @@ from utils.testing import *
 
 train_fraction = 0.6
 minJ = 0.05
-min_acc = 0.95
-alpha = 0.0005
+min_acc = 0.98
+alpha = 0.0001
 theta = 0.0
 eta = 0.05
 epochs = 100
