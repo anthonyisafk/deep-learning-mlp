@@ -14,7 +14,8 @@ def test_network(x, y, mlp, print_result=False):
         if pred == target:
             success += 1
 
-    print(f"\n  >>> Passed {success} / {ntests} tests.")
+    acc = 100 * success / ntests
+    print(f"\n  >>> Passed {success} / {ntests} tests. ({acc:2.3f}%)")
     return success / ntests
 
 
