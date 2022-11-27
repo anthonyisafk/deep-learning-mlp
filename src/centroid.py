@@ -5,29 +5,29 @@ from sklearn.neighbors import NearestCentroid
 from utils.neighbors_centroids import *
 from utils.testing import split_trainset_testset
 
-train_fraction = 0.6
-
-# species = {
-#     'SEKER': 0.0,
-#     'BARBUNYA': 1.0,
-#     'BOMBAY': 2.0,
-#     'CALI': 3.0,
-#     'DERMASON': 4.0,
-#     'HOROZ': 5.0,
-#     'SIRA': 6.0
-# }
+train_fraction = 0.8
 
 species = {
-    'Iris-setosa': 0.0,
-    'Iris-versicolor': 1.0,
-    'Iris-virginica': 2.0,
+    'SEKER': 0.0,
+    'BARBUNYA': 1.0,
+    'BOMBAY': 2.0,
+    'CALI': 3.0,
+    'DERMASON': 4.0,
+    'HOROZ': 5.0,
+    'SIRA': 6.0
 }
+
+# species = {
+#     'Iris-setosa': 0.0,
+#     'Iris-versicolor': 1.0,
+#     'Iris-virginica': 2.0,
+# }
 nlabels = len(species)
 
 
 def main():
-    df_train = pd.read_csv("iris/Iris.csv", header=1, delimiter=',')
-    # df_train = pd.read_csv("dry-bean/train_dataset.csv", header=1, delimiter=',')
+    # df_train = pd.read_csv("iris/Iris.csv", header=1, delimiter=',')
+    df_train = pd.read_csv("dry-bean/train_dataset.csv", header=1, delimiter=',')
     nrows, ncols = np.shape(df_train)
     x = df_train.values[:, 0:ncols-1]
     y = np.array([species[v] for v in df_train.values[:, ncols-1]])
