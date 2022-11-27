@@ -10,8 +10,6 @@ class Network:
     nlayers:int                # number of layers
     layers:np.ndarray          # list of layers
     nodes_per_layer:np.ndarray # neurons per layer
-    f:callable                 # activation function
-    df:callable                # activation function derivative
     eta:np.float32             # learning rate
     alpha:np.float32           # momentum constant
     e:np.float32               # total error
@@ -19,10 +17,9 @@ class Network:
     sdeltas:np.ndarray         # table of deltas for a single sample.
 
 
-    def __init__(self, nodes, eta, theta, alpha, f:activation):
+    def __init__(self, nodes, eta, theta, alpha, f):
         self.nlayers = len(nodes)
         check_for_layers(self.nlayers)
-        self.f, self.df = get_activation_function(f)
         self.nodes_per_layer = nodes
         self.eta = eta
         self.alpha = alpha
@@ -34,15 +31,17 @@ class Network:
         for i in range(1, self.nlayers):
             t = 'h' if i < self.nlayers - 1 else 'o'
             n_prev = nodes[i - 1]
-            self.layers[i] = Layer(i, nodes[i], n_prev, t, eta, theta, self.f, self.df)
+            fl, dfl = get_activation_function(f[i - 1])
+            self.layers[i] = Layer(i, nodes[i], n_prev, t, eta, theta, fl, dfl)
         self.sdeltas = np.ndarray(dtype=np.ndarray, shape=(self.nlayers - 1))
         for i in range(self.nlayers - 1):
             self.sdeltas[i] = np.zeros(dtype=np.float32, shape=(nodes[i + 1]))
 
 
-    def train(self, x, d, batch_size, epochs, minJ):
+    def train(self, x, d, batch_size, epochs, minJ=None, min_acc=None):
         print("  < - - - - - Training MLP... - - - - - >\n")
         fmt = "  - Epoch {} [{:3.2} secs.]: e = {:.2}, accuracy = {:.3}"
+        minJ, min_acc = get_min_training_values(minJ, min_acc)
         train_start = time.time()
         size, last_idx, out_layer, nout = self.get_input_output_info(x)
         for iter in range(epochs):
@@ -72,13 +71,13 @@ class Network:
             self.acc /= size
             epoch_end = time.time() - epoch_start
             print(fmt.format(iter, epoch_end, self.e, self.acc))
-            if self.e <= minJ:
-                print(f"  >> Stopping training in step {iter}. MSE reached minJ = {minJ}, or lower.\n")
+            if check_for_early_stopping(self.e, self.acc, minJ, min_acc, iter):
                 break
         train_time = time.time() - train_start
         print("  < - - - - - Completed training. - - - - - >\n")
         print(f"  >> Training took {train_time:4.2} secs. for {iter + 1} epochs.")
         print(f"   * Accuracy : {self.acc:.3}\n")
+        return self.acc
 
 
     def predict(self, x):
@@ -115,7 +114,7 @@ class Network:
         for n in range(nout):
             node = out_layer.nodes[n]
             e = node.get_error()
-            delta = e * self.df(node.u)
+            delta = e * node.df(node.u)
             node.e += e
             self.sdeltas[self.nlayers - 2][n] = delta
             node.delta += delta
@@ -128,7 +127,7 @@ class Network:
             curr_layer = self.layers[l]
             for i in range(curr_layer.n):
                 curr_layer.nodes[i].delta += calculate_delta(
-                    self.df(curr_layer.nodes[i].u), next_layer, self.sdeltas[l], i
+                    curr_layer.nodes[i].df(curr_layer.nodes[i].u), next_layer, self.sdeltas[l], i
                 )
             next_layer = curr_layer
 
