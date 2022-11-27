@@ -2,9 +2,9 @@ from classes.neuron import *
 
 
 def check_for_layers(nlayers):
-    if nlayers < 2:
+    if nlayers < 3:
         error = f"Number of layers given was less than 2 : {nlayers}. " + \
-        "The script makes an MLP with at least 2 layers."
+        "You need an input, an output and at least one hidden layer."
         raise Exception(error)
 
 
