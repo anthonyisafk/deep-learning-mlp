@@ -5,7 +5,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from utils.neighbors_centroids import *
 from utils.testing import split_trainset_testset
 
-train_fraction = 0.6
+train_fraction = 0.8
 
 # species = {
 #     'SEKER': 0.0,
